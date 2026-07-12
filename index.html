@@ -24,18 +24,19 @@
         /* Floating Title Styling (Bottom Left) */
         #map-title {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            z-index: 1000; /* Forces it to sit on top of the map layers */
+            top: 12px;
+            left: 55px; /* Pushes it just far enough right to clear the +/- buttons */
+            z-index: 1000;
             background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
+            padding: 8px 12px;
             font-family: 'Open Sans', sans-serif;
-            font-size: 16px;
+            font-size: 15px; /* Slightly cleaner default desktop size */
             font-weight: bold;
             color: #333;
             border-radius: 5px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-            pointer-events: none; /* Allows users to still click the map behind it */
+            pointer-events: none;
+            white-space: nowrap; /* Prevents text from breaking into 2 ugly rows */
         }
 
         /* Floating Credits Styling (Bottom Right) */
