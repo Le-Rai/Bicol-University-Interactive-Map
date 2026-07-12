@@ -1,0 +1,1 @@
+var json_BUMAINROADSHORTCUT_3 = {"type":"FeatureCollection","name":"BUMAINROADSHORTCUT_3","crs":{"type":"name","properties":{"name":"urn:ogc:def:crs:OGC:1.3:CRS84"}},"features":[{"type":"Feature","properties":{"id":null},"geometry":{"type":"MultiLineString","coordinates":[[[123.723520032593569,13.1454268391093],[123.724175448662251,13.144716035458117]]]}}]}
