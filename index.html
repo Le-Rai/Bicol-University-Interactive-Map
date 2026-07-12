@@ -105,6 +105,33 @@
             display: block;
             border-radius: 4px;
         }
+
+        @media (max-width: 600px) {
+            /* Makes the title smaller on mobile to fit nicely next to zoom buttons */
+            #map-title {
+                top: 12px;
+                left: 50px;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            /* Scales down the QR code container so it doesn't overwhelm a small phone screen */
+            #donation-box img {
+                width: 85px;
+                height: 85px;
+            }
+            #donation-box {
+                padding: 6px;
+                font-size: 9px;
+            }
+            #form-link, #map-credits {
+                font-size: 10px;
+                padding: 5px 8px;
+            }
+            #right-overlay-container {
+                bottom: 15px; /* Keeps it clear of the bottom browser bar */
+            }
+        }
         </style>
         <title></title>
     </head>
