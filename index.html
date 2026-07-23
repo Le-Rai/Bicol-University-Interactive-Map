@@ -35,7 +35,7 @@
             gap: 8px;
         }
 
-        /* Title Control - Absolutely positioned beside Zoom buttons */
+        /* Title Control - Positioned beside Zoom buttons */
         .map-title-control {
             position: absolute;
             left: 55px;
@@ -171,7 +171,7 @@
             pointer-events: auto;
         }
 
-        /* Google Form Hyperlink Container & Blue Link Style */
+        /* Google Form Hyperlink */
         .feedback-link {
             background-color: rgba(255, 255, 255, 0.95);
             padding: 4px 8px;
@@ -185,7 +185,7 @@
         .feedback-link a,
         .feedback-link a:visited,
         .feedback-link a:active {
-            color: #0066cc !important; /* !important forces the override */
+            color: #0066cc !important;
             text-decoration: none;
             font-weight: bold;
         }
@@ -278,7 +278,7 @@
                 
                 <!-- Box 1: About this app -->
                 <div class="about-card">
-                    <h2>About this app</h2>
+                    <h2>About this map</h2>
                     <p>
                         This website is <strong>not affiliated with or officially part of Bicol University</strong>. This is a personal project by <strong>Rainiel James Lazo</strong>, a BS Meteorology student fond of Mapping (QGIS). This map is still in progress and requires a lot of data that I am currently lacking, you may help me by clicking the "Help make this map better".
                     </p>
@@ -288,7 +288,8 @@
                 <div class="about-card">
                     <h2>Goal</h2>
                     <p>
-                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible interactive platform that is able to locate their current location (w/consent) as well as search building names for seamless navigation across university grounds.
+                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible interactive platform that is able to locate the user's current location (w/consent) as well as search building names for seamless navigation across university grounds.
+                    </p>
                     </p>
                 </div>
 
@@ -454,27 +455,18 @@
             }
         }
 
-        // 1. Zoom Control Added First
+        // Zoom Control
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
 
-        // 2. Search Control Added Second
-        map.addControl(new L.Control.Search({
-            layer: layer_BUMAINUniversityBuildings_6,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'College',
-            position: 'topleft'
-        }));
-
-        // 3. Geolocation Control Added Third
+        // Location Control
         L.control.locate({
             position: 'topleft',
             locateOptions: {maxZoom: 19}
         }).addTo(map);
 
-        // 4. Title Control Added (Positioned beside Zoom Box)
+        // Title Control
         var titleControl = L.control({position: 'topleft'});
         titleControl.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'map-title-control');
@@ -875,6 +867,15 @@
                         });
                     }
                 }
+
+        // Search Control placed after layer_BUMAINUniversityBuildings_6 is fully loaded
+        map.addControl(new L.Control.Search({
+            layer: layer_BUMAINUniversityBuildings_6,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'Name',
+            position: 'topleft'
+        }));
 
         if (typeof url === 'undefined') {
             document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
