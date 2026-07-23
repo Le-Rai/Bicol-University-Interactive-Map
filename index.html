@@ -7,8 +7,6 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
-        <!-- Leaflet Rotate Plugin CSS -->
-        <link rel="stylesheet" href="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/L.Control.Locate.min.css">
         <link rel="stylesheet" href="css/qgis2web.css">
@@ -27,7 +25,6 @@
             height: 100%;
             padding: 0;
             margin: 0;
-            touch-action: none;
         }
 
         /* Top-Left Controls Stack */
@@ -281,9 +278,9 @@
                 
                 <!-- Box 1: About this app -->
                 <div class="about-card">
-                    <h2>About this app</h2>
+                    <h2>About this map</h2>
                     <p>
-                        This interactive map provides detailed spatial visualization of Bicol University campuses, helping users locate university buildings, gates, roads, and services effortlessly.
+                        This website is <strong>not affiliated with or officially part of Bicol University</strong>. This is a personal project by <strong>Rainiel James Lazo</strong>, a BS Meteorology student fond of Mapping (QGIS). This map is still in progress and requires a lot of data that I am currently lacking, you may help me by clicking the "Help make this map better".
                     </p>
                 </div>
 
@@ -291,7 +288,8 @@
                 <div class="about-card">
                     <h2>Goal</h2>
                     <p>
-                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible geospatial platform for seamless navigation across university grounds.
+                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible interactive platform that is able to locate the user's current location (w/consent) as well as search building names for seamless navigation across university grounds.
+                    </p>
                     </p>
                 </div>
 
@@ -321,8 +319,6 @@
 
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <!-- Leaflet Rotate Plugin Script -->
-        <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
         <script src="js/L.Control.Locate.min.js"></script>
         <script src="js/leaflet.rotatedMarker.js"></script>
@@ -371,16 +367,13 @@
         var corner2 = L.latLng(13.152272006394693, 123.73453087950325); // North-East
         var bounds = L.latLngBounds(corner1, corner2);
 
-        // Map Initialization with Max Bounds Restricting Pan/Swipe & Touch Rotation Enabled
+        // Map Initialization with Max Bounds Restricting Pan/Swipe
         var map = L.map('map', {
             zoomControl: false, 
             maxZoom: 19, 
             minZoom: 15,
             maxBounds: bounds,
-            maxBoundsViscosity: 1.0,
-            preferCanvas: true,
-            rotate: true,
-            touchRotate: true
+            maxBoundsViscosity: 1.0
         });
 
         // Fit Bounds to Initial View
