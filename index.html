@@ -27,16 +27,19 @@
             margin: 0;
         }
 
-        /* Group top-left controls horizontally (Zoom + Title side-by-side) */
+        /* Top-Left Controls Stack */
         .leaflet-top.leaflet-left {
             display: flex;
-            flex-direction: row;
+            flex-direction: column;
             align-items: flex-start;
-            gap: 10px;
+            gap: 8px;
         }
 
-        /* 1. Top-Left Map Title */
+        /* Title Control - Absolutely positioned beside Zoom buttons */
         .map-title-control {
+            position: absolute;
+            left: 55px;
+            top: 0px;
             background-color: #ffffff;
             padding: 6px 12px;
             font-family: Arial, sans-serif;
@@ -45,10 +48,28 @@
             color: #333333;
             border-radius: 4px;
             box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-            margin-top: 10px !important;
-            margin-left: 0 !important;
-            display: inline-block;
             white-space: nowrap;
+            z-index: 1000;
+        }
+
+        /* Reset Leaflet margins for stacked controls underneath zoom */
+        .leaflet-top.leaflet-left .leaflet-control-search,
+        .leaflet-top.leaflet-left .leaflet-control-locate {
+            margin-top: 0 !important;
+            margin-left: 10px !important;
+            clear: left;
+        }
+
+        @media (max-width: 600px) {
+            .map-title-control {
+                font-size: 11px;
+                padding: 4px 8px;
+                white-space: normal;
+                max-width: 180px;
+            }
+            .leaflet-control-search .search-input {
+                max-width: 150px;
+            }
         }
 
         /* Bottom-Left "About this Project" Button */
@@ -162,7 +183,7 @@
             pointer-events: auto;
         }
 
-        /* Google Form Hyperlink */
+        /* Google Form Hyperlink Container & Blue Link Style */
         .feedback-link {
             background-color: rgba(255, 255, 255, 0.95);
             padding: 4px 8px;
@@ -171,13 +192,19 @@
             font-family: Arial, sans-serif;
             font-size: 12px;
         }
-        .feedback-link a {
-            color: #0066cc;
+
+        /* Force blue color on normal, visited, active, and hover states */
+        .feedback-link a,
+        .feedback-link a:visited,
+        .feedback-link a:active {
+            color: #0066cc !important; /* !important forces the override */
             text-decoration: none;
             font-weight: bold;
         }
+
         .feedback-link a:hover {
             text-decoration: underline;
+            color: #0066cc !important;
         }
 
         /* Personal Project Credit */
@@ -214,12 +241,6 @@
 
         /* Mobile Responsiveness Adjustments */
         @media (max-width: 600px) {
-            .map-title-control {
-                font-size: 11px;
-                padding: 4px 8px;
-                white-space: normal;
-                max-width: 180px;
-            }
             .coffee-box {
                 max-width: 90px;
                 padding: 5px;
@@ -436,12 +457,27 @@
             }
         }
 
-        // Zoom Control
+        // 1. Zoom Control Added First
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
 
-        // Title Control
+        // 2. Search Control Added Second
+        map.addControl(new L.Control.Search({
+            layer: layer_BUMAINUniversityBuildings_6,
+            initial: false,
+            hideMarkerOnCollapse: true,
+            propertyName: 'College',
+            position: 'topleft'
+        }));
+
+        // 3. Geolocation Control Added Third
+        L.control.locate({
+            position: 'topleft',
+            locateOptions: {maxZoom: 19}
+        }).addTo(map);
+
+        // 4. Title Control Added (Positioned beside Zoom Box)
         var titleControl = L.control({position: 'topleft'});
         titleControl.onAdd = function (map) {
             var div = L.DomUtil.create('div', 'map-title-control');
@@ -450,7 +486,6 @@
         };
         titleControl.addTo(map);
 
-        L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
         }
@@ -843,11 +878,7 @@
                         });
                     }
                 }
-        map.addControl(new L.Control.Search({
-            layer: layer_BUMAINUniversityBuildings_6,
-            initial: false,
-            hideMarkerOnCollapse: true,
-            propertyName: 'College'}));
+
         if (typeof url === 'undefined') {
             document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
         } else {
