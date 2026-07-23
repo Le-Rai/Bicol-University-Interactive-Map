@@ -60,18 +60,6 @@
             clear: left;
         }
 
-        @media (max-width: 600px) {
-            .map-title-control {
-                font-size: 11px;
-                padding: 4px 8px;
-                white-space: normal;
-                max-width: 180px;
-            }
-            .leaflet-control-search .search-input {
-                max-width: 150px;
-            }
-        }
-
         /* Bottom-Left "About this Project" Button */
         .about-project-btn {
             position: absolute;
@@ -241,6 +229,15 @@
 
         /* Mobile Responsiveness Adjustments */
         @media (max-width: 600px) {
+            .map-title-control {
+                font-size: 11px;
+                padding: 6px 10px;
+                white-space: nowrap;
+                max-width: none;
+            }
+            .leaflet-control-search .search-input {
+                max-width: 140px;
+            }
             .coffee-box {
                 max-width: 90px;
                 padding: 5px;
