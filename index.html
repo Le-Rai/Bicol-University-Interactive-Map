@@ -14,148 +14,290 @@
         <link rel="stylesheet" href="css/leaflet-search.css">
         <link rel="stylesheet" href="css/leaflet.photon.css">
         <style>
-        html, body, #map {
+        html, body {
             width: 100%;
             height: 100%;
             padding: 0;
             margin: 0;
         }
-        
-        /* Floating Title Styling (Bottom Left) */
-        #map-title {
-            position: absolute;
-            top: 12px;
-            left: 55px; /* Pushes it just far enough right to clear the +/- buttons */
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 15px; /* Slightly cleaner default desktop size */
-            font-weight: bold;
-            color: #333;
-            border-radius: 5px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
-            pointer-events: none;
-            white-space: nowrap; /* Prevents text from breaking into 2 ugly rows */
+        #map {
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            margin: 0;
         }
 
-        /* Floating Credits Styling (Bottom Right) */
-        /* Container to stack credits and QR code on the bottom right */
-        /* Container on the bottom right */
-        /* Container on the bottom right (stacks everything vertically) */
-        #right-overlay-container {
+        /* Group top-left controls horizontally (Zoom + Title side-by-side) */
+        .leaflet-top.leaflet-left {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        /* 1. Top-Left Map Title */
+        .map-title-control {
+            background-color: #ffffff;
+            padding: 6px 12px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333333;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+            margin-top: 10px !important;
+            margin-left: 0 !important;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        /* Bottom-Left "About this Project" Button */
+        .about-project-btn {
             position: absolute;
-            bottom: 25px; /* Offset to sit nicely above standard Leaflet attributions */
+            bottom: 20px;
+            left: 10px;
+            z-index: 1000;
+            background-color: #ffffff;
+            padding: 6px 12px;
+            border-radius: 4px;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .about-project-btn:hover {
+            background-color: #f0f0f0;
+            text-decoration: underline;
+        }
+
+        /* Overlay View (Hidden by default) */
+        #about-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(240, 242, 245, 0.98);
+            z-index: 2000;
+            overflow-y: auto;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        /* Centered Flex Container */
+        .about-container {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* White Content Cards */
+        .about-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            padding: 24px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .about-card h2 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+            color: #1a1a1a;
+        }
+
+        .about-card p {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #4a4a4a;
+        }
+
+        /* Return to Map Link */
+        .return-link {
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+            font-weight: bold;
+            color: #0066cc;
+            cursor: pointer;
+            text-decoration: none;
+            margin-top: 8px;
+            padding: 8px 16px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .return-link:hover {
+            text-decoration: underline;
+            background-color: #f8f9fa;
+        }
+
+        /* Bottom-Right Custom Overlay Container */
+        .bottom-right-container {
+            position: absolute;
+            bottom: 20px;
             right: 10px;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            align-items: flex-end; /* Aligns everything neatly to the right edge */
-            gap: 8px; /* Clean spacing between every stacked element */
-        }
-
-        /* Styling for the Suggestion Hyperlink */
-        #form-link {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 6px 12px;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 11px;
-            font-weight: bold;
-            color: #0056b3;
-            text-decoration: none;
-            border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
-        }
-
-        /* Hover effect for the link button */
-        #form-link:hover {
-            color: #003570;
-            background: rgba(240, 240, 240, 1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        /* Floating Credits Styling */
-        #map-credits {
-            background: rgba(255, 255, 255, 0.9);
-            padding: 5px 10px;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 12px;
-            font-weight: bold;
-            color: #333;
-            border-radius: 4px;
-            box-shadow: 0 1px 5px rgba(0,0,0,0.2);
+            align-items: flex-end;
+            gap: 6px;
             pointer-events: none;
         }
+        .bottom-right-container * {
+            pointer-events: auto;
+        }
 
-        /* QR Code Donation Box Styling */
-        #donation-box {
-            background: rgba(255, 255, 255, 0.9);
+        /* Google Form Hyperlink */
+        .feedback-link {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 4px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+        }
+        .feedback-link a {
+            color: #0066cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        .feedback-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Personal Project Credit */
+        .portfolio-credit {
+            background-color: rgba(255, 255, 255, 0.95);
+            padding: 4px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333333;
+        }
+
+        /* Buy Me Coffee Container */
+        .coffee-box {
+            background-color: #ffffff;
             padding: 8px;
             border-radius: 6px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
             text-align: center;
-            font-family: 'Open Sans', sans-serif;
-            font-size: 10px;
-            color: #444;
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            font-weight: bold;
+            color: #333333;
+            max-width: 120px;
         }
-
-        #donation-box img {
-            width: 110px;
-            height: 110px;
+        .coffee-box img {
+            width: 100px;
+            height: auto;
+            margin-top: 4px;
             display: block;
-            border-radius: 4px;
         }
 
+        /* Mobile Responsiveness Adjustments */
         @media (max-width: 600px) {
-            /* Makes the title smaller on mobile to fit nicely next to zoom buttons */
-            #map-title {
-                top: 12px;
-                left: 50px;
-                font-size: 12px;
-                padding: 6px 10px;
+            .map-title-control {
+                font-size: 11px;
+                padding: 4px 8px;
+                white-space: normal;
+                max-width: 180px;
             }
-
-            /* Scales down the QR code container so it doesn't overwhelm a small phone screen */
-            #donation-box img {
-                width: 85px;
-                height: 85px;
-            }
-            #donation-box {
-                padding: 6px;
-                font-size: 9px;
-            }
-            #form-link, #map-credits {
+            .coffee-box {
+                max-width: 90px;
+                padding: 5px;
                 font-size: 10px;
-                padding: 5px 8px;
             }
-            #right-overlay-container {
-                bottom: 15px; /* Keeps it clear of the bottom browser bar */
+            .coffee-box img {
+                width: 80px;
+            }
+            .feedback-link, .portfolio-credit, .about-project-btn {
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+            .about-card {
+                padding: 16px;
+            }
+            .about-card h2 {
+                font-size: 16px;
+            }
+            .about-card p {
+                font-size: 13px;
             }
         }
         </style>
-        <title></title>
+        <title>Bicol University Campus Interactive Map</title>
     </head>
     <body>
         <div id="map">
-            <!-- Custom Campus Title -->
-            <div id="map-title">Bicol University Interactive Map</div>
-            
-            <!-- Custom Developer Credits & Interactivity Container -->
-            <div id="right-overlay-container">
-                <!-- Suggestion Google Form Hyperlink (Now at the top) -->
-                <a id="form-link" href="https://docs.google.com/forms/d/e/1FAIpQLScorXGhRWUZdQzfxVplCBlZMt6XG6Ii9KywiBgKt2rEPlLmiQ/viewform?usp=header" target="_blank">Help make this map better</a>
+        </div>
+
+        <!-- Bottom-Left "About this Project" Button -->
+        <div class="about-project-btn" onclick="openAbout()">
+            About this Project
+        </div>
+
+        <!-- Full Screen "About" Overlay -->
+        <div id="about-overlay">
+            <div class="about-container">
                 
-                <!-- Floating Developer Credits -->
-                <div id="map-credits">Personal Project of Rainiel James Lazo</div>
-                
-                <!-- Box containing just the QR code now -->
-                <div id="donation-box">
-                    <p style="margin: 0 0 5px 0; font-weight: bold;">Support this project</p>
-                    <img src="GCASH.jpg" alt="GCash QR Code">
+                <!-- Box 1: About this app -->
+                <div class="about-card">
+                    <h2>About this app</h2>
+                    <p>
+                        This website is <strong>not affiliated with or officially part of Bicol University</strong>. This is a personal project by <strong>Rainiel James Lazo</strong>, a BS Meteorology student fond of Mapping (QGIS). This map is still in progress and requires a lot of data that I am currently lacking, you may help me by clicking the "Help make this map better".
+                    </p>
                 </div>
+
+                <!-- Box 2: Goal -->
+                <div class="about-card">
+                    <h2>Goal</h2>
+                    <p>
+                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible interactive platform that is able to locate their current location (w/consent) as well as search building names for seamless navigation across university grounds.
+                    </p>
+                </div>
+
+                <!-- Return to Map Button -->
+                <div class="return-link" onclick="closeAbout()">
+                    ← Return to Map
+                </div>
+
             </div>
         </div>
+
+        <!-- Custom Bottom Right Floating UI Elements -->
+        <div class="bottom-right-container">
+            <div class="feedback-link">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScorXGhRWUZdQzfxVplCBlZMt6XG6Ii9KywiBgKt2rEPlLmiQ/viewform" target="_blank">Help make this map better</a>
+            </div>
+
+            <div class="portfolio-credit">
+                Personal Project of Rainiel James Lazo
+            </div>
+
+            <div class="coffee-box">
+                Buy me Coffee :3
+                <img src="GCASH.jpg" alt="GCash QR Code">
+            </div>
+        </div>
+
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
@@ -175,16 +317,16 @@
         <script src="data/BUMAINOUTLINE_4.js"></script>
         <script src="data/BUMAINGATES_5.js"></script>
         <script src="data/BUMAINUniversityBuildings_6.js"></script>
-        <script src="data/BUMAINDentalMedicine_7.js"></script>
-        <script src="data/BUMAINCollegeofArtsandLetters_8.js"></script>
-        <script src="data/BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9.js"></script>
-        <script src="data/BUMAINCollegeofLaw_10.js"></script>
-        <script src="data/BUMAINCollegeofMedicine_11.js"></script>
-        <script src="data/BUMAINInstituteofSportsandRecreation_12.js"></script>
-        <script src="data/BUMAINCollegeofNursing_13.js"></script>
-        <script src="data/BUMAINCollegeofScience_14.js"></script>
-        <script src="data/BUMAINCollegeofEducation_15.js"></script>
         <script>
+        // Toggle Overlay JS
+        function openAbout() {
+            document.getElementById('about-overlay').style.display = 'block';
+        }
+
+        function closeAbout() {
+            document.getElementById('about-overlay').style.display = 'none';
+        }
+
         var highlightLayer;
         function highlightFeature(e) {
             highlightLayer = e.target;
@@ -200,12 +342,28 @@
               });
             }
         }
+
+        // Define Bounding Box Coordinates
+        var corner1 = L.latLng(13.140256579762477, 123.70920907803814); // South-West
+        var corner2 = L.latLng(13.152272006394693, 123.73453087950325); // North-East
+        var bounds = L.latLngBounds(corner1, corner2);
+
+        // Map Initialization with Max Bounds Restricting Pan/Swipe
         var map = L.map('map', {
-            zoomControl:false, maxZoom:19, minZoom:16
-        })
+            zoomControl: false, 
+            maxZoom: 19, 
+            minZoom: 15,
+            maxBounds: bounds,
+            maxBoundsViscosity: 1.0
+        });
+
+        // Fit Bounds to Initial View
+        map.fitBounds(bounds);
+
         var hash = new L.Hash(map);
         map.attributionControl.setPrefix('<a href="https://github.com/qgis2web/qgis2web" target="_blank">qgis2web</a> &middot; <a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a> &middot; <a href="https://qgis.org">QGIS</a>');
         var autolinker = new Autolinker({truncate: {length: 30, location: 'smart'}});
+
         // remove popup's row if "visible-with-data"
         function removeEmptyRowsFromPopupContent(content, feature) {
          var tempDiv = document.createElement('div');
@@ -220,6 +378,7 @@
          }
          return tempDiv.innerHTML;
         }
+
         // modify popup if contains media
         function addClassToPopupIfMedia(content, popup) {
             var tempDiv = document.createElement('div');
@@ -231,7 +390,6 @@
                     popup._contentNode.classList.add('media');
                     var img = popup._contentNode.querySelector('td img');
                     if (img) {
-                        // If already loaded (cache), update immediately
                         if (img.complete && img.naturalHeight > 0) {
                             popup.update();
                         } else {
@@ -263,7 +421,6 @@
                     video.style.maxWidth = "60vw";
                     imgTd.parentNode.replaceChild(video, imgTd);
                     popup._contentNode.classList.add('media');
-                    // Aggiorna il popup quando il video carica i metadati
                     video.addEventListener('loadedmetadata', function() {
                         popup.update();
                     });
@@ -278,15 +435,24 @@
                 popup._contentNode.classList.remove('media');
             }
         }
+
+        // Zoom Control
         var zoomControl = L.control.zoom({
             position: 'topleft'
         }).addTo(map);
+
+        // Title Control
+        var titleControl = L.control({position: 'topleft'});
+        titleControl.onAdd = function (map) {
+            var div = L.DomUtil.create('div', 'map-title-control');
+            div.innerHTML = 'Bicol University Campus Interactive Map';
+            return div;
+        };
+        titleControl.addTo(map);
+
         L.control.locate({locateOptions: {maxZoom: 19}}).addTo(map);
         var bounds_group = new L.featureGroup([]);
         function setBounds() {
-            if (bounds_group.getLayers().length) {
-                map.fitBounds(bounds_group.getBounds());
-            }
         }
         map.createPane('pane_OpenStreetMap_0');
         map.getPane('pane_OpenStreetMap_0').style.zIndex = 400;
@@ -294,13 +460,14 @@
             pane: 'pane_OpenStreetMap_0',
             opacity: 1.0,
             attribution: '',
-            minZoom: 16,
+            minZoom: 15,
             maxZoom: 19,
             minNativeZoom: 0,
             maxNativeZoom: 19
         });
         layer_OpenStreetMap_0;
         map.addLayer(layer_OpenStreetMap_0);
+
         function pop_BUMAINCampus_1(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -353,6 +520,7 @@
         });
         bounds_group.addLayer(layer_BUMAINCampus_1);
         map.addLayer(layer_BUMAINCampus_1);
+
         function pop_BUMAINROADS_2(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -403,6 +571,7 @@
         });
         bounds_group.addLayer(layer_BUMAINROADS_2);
         map.addLayer(layer_BUMAINROADS_2);
+
         function pop_BUMAINROADSHORTCUT_3(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -453,6 +622,7 @@
         });
         bounds_group.addLayer(layer_BUMAINROADSHORTCUT_3);
         map.addLayer(layer_BUMAINROADSHORTCUT_3);
+
         function pop_BUMAINOUTLINE_4(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -503,6 +673,7 @@
         });
         bounds_group.addLayer(layer_BUMAINOUTLINE_4);
         map.addLayer(layer_BUMAINOUTLINE_4);
+
         function pop_BUMAINGATES_5(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -563,6 +734,7 @@
         });
         bounds_group.addLayer(layer_BUMAINGATES_5);
         map.addLayer(layer_BUMAINGATES_5);
+
         function pop_BUMAINUniversityBuildings_6(feature, layer) {
             layer.on({
                 mouseout: function(e) {
@@ -590,6 +762,10 @@
                     <tr>\
                         <th scope="row">Department</th>\
                         <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
+                    </tr>\
+                    <tr>\
+                        <th scope="row">Orgs</th>\
+                        <td>' + (feature.properties['Orgs'] !== null ? autolinker.link(String(feature.properties['Orgs']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
                     </tr>\
                 </table>';
             var content = removeEmptyRowsFromPopupContent(popupContent, feature);
@@ -628,614 +804,8 @@
         });
         bounds_group.addLayer(layer_BUMAINUniversityBuildings_6);
         map.addLayer(layer_BUMAINUniversityBuildings_6);
-        function pop_BUMAINDentalMedicine_7(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
 
-        function style_BUMAINDentalMedicine_7_0() {
-            return {
-                pane: 'pane_BUMAINDentalMedicine_7',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(243,166,178,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINDentalMedicine_7');
-        map.getPane('pane_BUMAINDentalMedicine_7').style.zIndex = 407;
-        map.getPane('pane_BUMAINDentalMedicine_7').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINDentalMedicine_7 = new L.geoJson(json_BUMAINDentalMedicine_7, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINDentalMedicine_7',
-            layerName: 'layer_BUMAINDentalMedicine_7',
-            pane: 'pane_BUMAINDentalMedicine_7',
-            onEachFeature: pop_BUMAINDentalMedicine_7,
-            style: style_BUMAINDentalMedicine_7_0,
-        });
-        bounds_group.addLayer(layer_BUMAINDentalMedicine_7);
-        map.addLayer(layer_BUMAINDentalMedicine_7);
-        function pop_BUMAINCollegeofArtsandLetters_8(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofArtsandLetters_8_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofArtsandLetters_8',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(255,45,232,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofArtsandLetters_8');
-        map.getPane('pane_BUMAINCollegeofArtsandLetters_8').style.zIndex = 408;
-        map.getPane('pane_BUMAINCollegeofArtsandLetters_8').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofArtsandLetters_8 = new L.geoJson(json_BUMAINCollegeofArtsandLetters_8, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofArtsandLetters_8',
-            layerName: 'layer_BUMAINCollegeofArtsandLetters_8',
-            pane: 'pane_BUMAINCollegeofArtsandLetters_8',
-            onEachFeature: pop_BUMAINCollegeofArtsandLetters_8,
-            style: style_BUMAINCollegeofArtsandLetters_8_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofArtsandLetters_8);
-        map.addLayer(layer_BUMAINCollegeofArtsandLetters_8);
-        function pop_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9_0() {
-            return {
-                pane: 'pane_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(232,217,41,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9');
-        map.getPane('pane_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9').style.zIndex = 409;
-        map.getPane('pane_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9 = new L.geoJson(json_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9',
-            layerName: 'layer_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9',
-            pane: 'pane_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9',
-            onEachFeature: pop_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9,
-            style: style_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9_0,
-        });
-        bounds_group.addLayer(layer_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9);
-        map.addLayer(layer_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9);
-        function pop_BUMAINCollegeofLaw_10(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofLaw_10_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofLaw_10',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(166,255,146,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofLaw_10');
-        map.getPane('pane_BUMAINCollegeofLaw_10').style.zIndex = 410;
-        map.getPane('pane_BUMAINCollegeofLaw_10').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofLaw_10 = new L.geoJson(json_BUMAINCollegeofLaw_10, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofLaw_10',
-            layerName: 'layer_BUMAINCollegeofLaw_10',
-            pane: 'pane_BUMAINCollegeofLaw_10',
-            onEachFeature: pop_BUMAINCollegeofLaw_10,
-            style: style_BUMAINCollegeofLaw_10_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofLaw_10);
-        map.addLayer(layer_BUMAINCollegeofLaw_10);
-        function pop_BUMAINCollegeofMedicine_11(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofMedicine_11_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofMedicine_11',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(255,101,155,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofMedicine_11');
-        map.getPane('pane_BUMAINCollegeofMedicine_11').style.zIndex = 411;
-        map.getPane('pane_BUMAINCollegeofMedicine_11').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofMedicine_11 = new L.geoJson(json_BUMAINCollegeofMedicine_11, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofMedicine_11',
-            layerName: 'layer_BUMAINCollegeofMedicine_11',
-            pane: 'pane_BUMAINCollegeofMedicine_11',
-            onEachFeature: pop_BUMAINCollegeofMedicine_11,
-            style: style_BUMAINCollegeofMedicine_11_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofMedicine_11);
-        map.addLayer(layer_BUMAINCollegeofMedicine_11);
-        function pop_BUMAINInstituteofSportsandRecreation_12(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINInstituteofSportsandRecreation_12_0() {
-            return {
-                pane: 'pane_BUMAINInstituteofSportsandRecreation_12',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(249,158,48,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINInstituteofSportsandRecreation_12');
-        map.getPane('pane_BUMAINInstituteofSportsandRecreation_12').style.zIndex = 412;
-        map.getPane('pane_BUMAINInstituteofSportsandRecreation_12').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINInstituteofSportsandRecreation_12 = new L.geoJson(json_BUMAINInstituteofSportsandRecreation_12, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINInstituteofSportsandRecreation_12',
-            layerName: 'layer_BUMAINInstituteofSportsandRecreation_12',
-            pane: 'pane_BUMAINInstituteofSportsandRecreation_12',
-            onEachFeature: pop_BUMAINInstituteofSportsandRecreation_12,
-            style: style_BUMAINInstituteofSportsandRecreation_12_0,
-        });
-        bounds_group.addLayer(layer_BUMAINInstituteofSportsandRecreation_12);
-        map.addLayer(layer_BUMAINInstituteofSportsandRecreation_12);
-        function pop_BUMAINCollegeofNursing_13(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofNursing_13_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofNursing_13',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(0,255,255,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofNursing_13');
-        map.getPane('pane_BUMAINCollegeofNursing_13').style.zIndex = 413;
-        map.getPane('pane_BUMAINCollegeofNursing_13').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofNursing_13 = new L.geoJson(json_BUMAINCollegeofNursing_13, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofNursing_13',
-            layerName: 'layer_BUMAINCollegeofNursing_13',
-            pane: 'pane_BUMAINCollegeofNursing_13',
-            onEachFeature: pop_BUMAINCollegeofNursing_13,
-            style: style_BUMAINCollegeofNursing_13_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofNursing_13);
-        map.addLayer(layer_BUMAINCollegeofNursing_13);
-        function pop_BUMAINCollegeofScience_14(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofScience_14_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofScience_14',
-                opacity: 1,
-                color: 'rgba(35,35,35,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(76,252,44,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofScience_14');
-        map.getPane('pane_BUMAINCollegeofScience_14').style.zIndex = 414;
-        map.getPane('pane_BUMAINCollegeofScience_14').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofScience_14 = new L.geoJson(json_BUMAINCollegeofScience_14, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofScience_14',
-            layerName: 'layer_BUMAINCollegeofScience_14',
-            pane: 'pane_BUMAINCollegeofScience_14',
-            onEachFeature: pop_BUMAINCollegeofScience_14,
-            style: style_BUMAINCollegeofScience_14_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofScience_14);
-        map.addLayer(layer_BUMAINCollegeofScience_14);
-        function pop_BUMAINCollegeofEducation_15(feature, layer) {
-            layer.on({
-                mouseout: function(e) {
-                    for (var i in e.target._eventParents) {
-                        if (typeof e.target._eventParents[i].resetStyle === 'function') {
-                            e.target._eventParents[i].resetStyle(e.target);
-                        }
-                    }
-                },
-                mouseover: highlightFeature,
-            });
-            var popupContent = '<table>\
-                    <tr>\
-                        <th scope="row">Name</th>\
-                        <td>' + (feature.properties['Name'] !== null ? autolinker.link(String(feature.properties['Name']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">College</th>\
-                        <td>' + (feature.properties['College'] !== null ? autolinker.link(String(feature.properties['College']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Services</th>\
-                        <td>' + (feature.properties['Services'] !== null ? autolinker.link(String(feature.properties['Services']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                    <tr>\
-                        <th scope="row">Department</th>\
-                        <td>' + (feature.properties['Department'] !== null ? autolinker.link(String(feature.properties['Department']).replace(/'/g, '\'').toLocaleString()) : '') + '</td>\
-                    </tr>\
-                </table>';
-            var content = removeEmptyRowsFromPopupContent(popupContent, feature);
-			layer.on('popupopen', function(e) {
-				addClassToPopupIfMedia(content, e.popup);
-			});
-			layer.bindPopup(content, { maxHeight: 400 });
-        }
-
-        function style_BUMAINCollegeofEducation_15_0() {
-            return {
-                pane: 'pane_BUMAINCollegeofEducation_15',
-                opacity: 1,
-                color: 'rgba(247,225,55,1.0)',
-                dashArray: '',
-                lineCap: 'butt',
-                lineJoin: 'miter',
-                weight: 1.0, 
-                fill: true,
-                fillOpacity: 1,
-                fillColor: 'rgba(118,173,255,1.0)',
-                interactive: true,
-            }
-        }
-        map.createPane('pane_BUMAINCollegeofEducation_15');
-        map.getPane('pane_BUMAINCollegeofEducation_15').style.zIndex = 415;
-        map.getPane('pane_BUMAINCollegeofEducation_15').style['mix-blend-mode'] = 'normal';
-        var layer_BUMAINCollegeofEducation_15 = new L.geoJson(json_BUMAINCollegeofEducation_15, {
-            attribution: '',
-            interactive: true,
-            dataVar: 'json_BUMAINCollegeofEducation_15',
-            layerName: 'layer_BUMAINCollegeofEducation_15',
-            pane: 'pane_BUMAINCollegeofEducation_15',
-            onEachFeature: pop_BUMAINCollegeofEducation_15,
-            style: style_BUMAINCollegeofEducation_15_0,
-        });
-        bounds_group.addLayer(layer_BUMAINCollegeofEducation_15);
-        map.addLayer(layer_BUMAINCollegeofEducation_15);
-        var overlaysTree = [
-            {label: '<img src="legend/BUMAINCollegeofEducation_15.png" /> BU MAIN - College of Education', layer: layer_BUMAINCollegeofEducation_15},
-            {label: '<img src="legend/BUMAINCollegeofScience_14.png" /> BU MAIN - College of Science', layer: layer_BUMAINCollegeofScience_14},
-            {label: '<img src="legend/BUMAINCollegeofNursing_13.png" /> BU MAIN - College of Nursing', layer: layer_BUMAINCollegeofNursing_13},
-            {label: '<img src="legend/BUMAINInstituteofSportsandRecreation_12.png" /> BU MAIN - Institute of Sports and Recreation', layer: layer_BUMAINInstituteofSportsandRecreation_12},
-            {label: '<img src="legend/BUMAINCollegeofMedicine_11.png" /> BU MAIN - College of Medicine', layer: layer_BUMAINCollegeofMedicine_11},
-            {label: '<img src="legend/BUMAINCollegeofLaw_10.png" /> BU MAIN - College of Law', layer: layer_BUMAINCollegeofLaw_10},
-            {label: '<img src="legend/BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9.png" /> BU MAIN - Jesse M. Robredo Institute of Governance and Development', layer: layer_BUMAINJesseMRobredoInstituteofGovernanceandDevelopment_9},
-            {label: '<img src="legend/BUMAINCollegeofArtsandLetters_8.png" /> BU MAIN - College of Arts and Letters', layer: layer_BUMAINCollegeofArtsandLetters_8},
-            {label: '<img src="legend/BUMAINDentalMedicine_7.png" /> BU MAIN - Dental Medicine', layer: layer_BUMAINDentalMedicine_7},
-            {label: "OpenStreetMap", layer: layer_OpenStreetMap_0, radioGroup: 'bm' },]
-        var lay = L.control.layers.tree(null, overlaysTree,{
-            //namedToggle: true,
-            //selectorBack: false,
-            //closedSymbol: '&#8862; &#x1f5c0;',
-            //openedSymbol: '&#8863; &#x1f5c1;',
-            //collapseAll: 'Collapse all',
-            //expandAll: 'Expand all',
-            collapsed: true,
-        });
-        lay.addTo(map);
         map.on("zoomend", function(){
-
                 if (map.hasLayer(layer_BUMAINUniversityBuildings_6)) {
                     if (map.getZoom() <= 18 && map.getZoom() >= 19) {
                         layer_BUMAINUniversityBuildings_6.eachLayer(function (layer) {
@@ -1277,21 +847,21 @@
             layer: layer_BUMAINUniversityBuildings_6,
             initial: false,
             hideMarkerOnCollapse: true,
-            propertyName: 'Name'}));
+            propertyName: 'College'}));
         if (typeof url === 'undefined') {
             document.getElementsByClassName('search-button')[0].className += ' fa fa-binoculars';
         } else {
             document.getElementsByClassName('search-button')[1].className += ' fa fa-binoculars';
         }
-        resetLabels([layer_BUMAINUniversityBuildings_6,layer_BUMAINCollegeofEducation_15]);
+        resetLabels([layer_BUMAINUniversityBuildings_6]);
         map.on("zoomend", function(){
-            resetLabels([layer_BUMAINUniversityBuildings_6,layer_BUMAINCollegeofEducation_15]);
+            resetLabels([layer_BUMAINUniversityBuildings_6]);
         });
         map.on("layeradd", function(){
-            resetLabels([layer_BUMAINUniversityBuildings_6,layer_BUMAINCollegeofEducation_15]);
+            resetLabels([layer_BUMAINUniversityBuildings_6]);
         });
         map.on("layerremove", function(){
-            resetLabels([layer_BUMAINUniversityBuildings_6,layer_BUMAINCollegeofEducation_15]);
+            resetLabels([layer_BUMAINUniversityBuildings_6]);
         });
         </script>
     </body>
