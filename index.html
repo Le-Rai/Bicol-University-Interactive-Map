@@ -7,6 +7,8 @@
         <meta name="mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <link rel="stylesheet" href="css/leaflet.css">
+        <!-- Leaflet Rotate Plugin CSS -->
+        <link rel="stylesheet" href="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate.css">
         <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
         <link rel="stylesheet" href="css/L.Control.Locate.min.css">
         <link rel="stylesheet" href="css/qgis2web.css">
@@ -25,6 +27,7 @@
             height: 100%;
             padding: 0;
             margin: 0;
+            touch-action: none;
         }
 
         /* Top-Left Controls Stack */
@@ -318,7 +321,7 @@
 
         <script src="js/qgis2web_expressions.js"></script>
         <script src="js/leaflet.js"></script>
-        <!-- Leaflet Rotate Plugin -->
+        <!-- Leaflet Rotate Plugin Script -->
         <script src="https://unpkg.com/leaflet-rotate@0.2.8/dist/leaflet-rotate-src.js"></script>
         <script src="js/L.Control.Layers.Tree.min.js"></script>
         <script src="js/L.Control.Locate.min.js"></script>
@@ -375,6 +378,7 @@
             minZoom: 15,
             maxBounds: bounds,
             maxBoundsViscosity: 1.0,
+            preferCanvas: true,
             rotate: true,
             touchRotate: true
         });
