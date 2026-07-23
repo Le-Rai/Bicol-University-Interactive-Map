@@ -278,9 +278,9 @@
                 
                 <!-- Box 1: About this app -->
                 <div class="about-card">
-                    <h2>About this map</h2>
+                    <h2>About this app</h2>
                     <p>
-                        This website is <strong>not affiliated with or officially part of Bicol University</strong>. This is a personal project by <strong>Rainiel James Lazo</strong>, a BS Meteorology student fond of Mapping (QGIS). This map is still in progress and requires a lot of data that I am currently lacking, you may help me by clicking the "Help make this map better".
+                        This interactive map provides detailed spatial visualization of Bicol University campuses, helping users locate university buildings, gates, roads, and services effortlessly.
                     </p>
                 </div>
 
@@ -288,8 +288,7 @@
                 <div class="about-card">
                     <h2>Goal</h2>
                     <p>
-                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible interactive platform that is able to locate the user's current location (w/consent) as well as search building names for seamless navigation across university grounds.
-                    </p>
+                        The primary goal of this project is to support incoming freshmen, students, faculty, and visitors with an accessible geospatial platform for seamless navigation across university grounds.
                     </p>
                 </div>
 
@@ -367,13 +366,14 @@
         var corner2 = L.latLng(13.152272006394693, 123.73453087950325); // North-East
         var bounds = L.latLngBounds(corner1, corner2);
 
-        // Map Initialization with Max Bounds Restricting Pan/Swipe
+        // Map Initialization with Max Bounds Restricting Pan/Swipe & Touch Rotation Enabled
         var map = L.map('map', {
             zoomControl: false, 
             maxZoom: 19, 
             minZoom: 15,
             maxBounds: bounds,
-            maxBoundsViscosity: 1.0
+            maxBoundsViscosity: 1.0,
+            touchRotate: true
         });
 
         // Fit Bounds to Initial View
